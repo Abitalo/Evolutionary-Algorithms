@@ -31,13 +31,13 @@ def get_img(X,Y,P):
 
 
 def mutate(P, f=0.9):
-	# empty placeholder for mutated population, with same size to original(or previous) population.
+    # empty placeholder for mutated population, with same size to original(or previous) population.
     M = np.empty_like(P)
 
     # iterate individual c in previous population, mutate by difference from  2 randomly individuals picked from the rest population.
     for i, c in enumerate(P):
 
-    	# get the subset of population with current individuals removed.
+        # get the subset of population with current individuals removed.
         indice = [x for x in range(N) if x is not i]
 
         # randomly pick 2 individuals from the subset.
@@ -75,48 +75,48 @@ def select(P):
     return new_P   
 
 if __name__ == '__main__':
-	# plot the objective function.
-	X = list(np.linspace(-50,50,1001))
-	Y = []
-	for x in np.linspace(-50,50,1001):
-	    Y.append(obj_fn(x))
-	plt.plot(X,Y)
+    # plot the objective function.
+    X = list(np.linspace(-50,50,1001))
+    Y = []
+    for x in np.linspace(-50,50,1001):
+        Y.append(obj_fn(x))
+    plt.plot(X,Y)
 
-	# basic hyper parameter
-	N = 100 # population size
-	F = 0.9 # scale factor
-	CR = 0.5 # cross rate
-	max_G = 20 # max generation
+    # basic hyper parameter
+    N = 100 # population size
+    F = 0.9 # scale factor
+    CR = 0.5 # cross rate
+    max_G = 20 # max generation
 
-	# initial population randomly sampled from (-50,50).
-	P = np.random.rand(N)*100-50
+    # initial population randomly sampled from (-50,50).
+    P = np.random.rand(N)*100-50
 
-	img_list = [] # only for image saving purpose.
-	try:
-	    with tqdm(range(max_G)) as t:
+    img_list = [] # only for image saving purpose.
+    try:
+        with tqdm(range(max_G)) as t:
 
-	    	# iterate N generation
-	        for i in t:
-	        	# plot current location of individuals over ojective function figure.
-	            img_list.append(get_img(X,Y,P))
-	            M = mutate(P)
-	            P = cross(P,M)           
-	            P = select(P)
+            # iterate N generation
+            for i in t:
+                # plot current location of individuals over ojective function figure.
+                img_list.append(get_img(X,Y,P))
+                M = mutate(P)
+                P = cross(P,M)           
+                P = select(P)
 
-	except KeyboardInterrupt:
-	    t.close()
-	    raise
-	finally:
-	    t.close
+    except KeyboardInterrupt:
+        t.close()
+        raise
+    finally:
+        t.close
 
-	# generate animation gif.
-	duration = 1
-	fps = 20
+    # generate animation gif.
+    duration = 1
+    fps = 20
 
-	# callback function required by generate animation.
-	def make_frame_mpl(t):
-	    t=int(t*duration*fps)
-	    return img_list[t] # RGB ndarray for image.
+    # callback function required by generate animation.
+    def make_frame_mpl(t):
+        t=int(t*duration*fps)
+        return img_list[t] # RGB ndarray for image.
 
-	animation =mpy.VideoClip(make_frame_mpl, duration=duration)
-	animation.write_gif("de_iteration.gif", fps)
+    animation =mpy.VideoClip(make_frame_mpl, duration=duration)
+    animation.write_gif("de_iteration.gif", fps)
