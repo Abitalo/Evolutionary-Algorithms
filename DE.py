@@ -39,8 +39,8 @@ def mutate(P, f=0.9):
 
 
 def cross(P, M, cr=0.5):
-    # crossover for 1-dimensional individuals given that scenario.
-    new_P = np.asarray([M[i] if np.random.rand()<cr else P[i] for i in range(len(P))])
+    # crossover subject to cross_rate cr.
+    new_P = np.where(np.random.rand(N)<cr,M,P)
     
     return new_P
 
