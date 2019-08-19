@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from moviepy.video.io.bindings import mplfig_to_npimage
-import moviepy.editor as mpy
 from tqdm import tqdm
+from matplotlib.animation import FuncAnimation
 
 
 # This file implemented Differential Evolution Algorithm(DE) to search the maximum value for function obj_fn(x), 
@@ -12,34 +11,37 @@ from tqdm import tqdm
 
 # the objectve function made up by personal choice.
 def obj_fn(x):
+    if not np.all(x):
+        return None
+    
+    if not isinstance(x, np.ndarray):
+        x = np.asarray(x)
+        
     ret = np.sin(x-3)*np.sin(0.5*x-3)-np.log(x**2+1)
     return ret
 
 
-# convert the maplotlib figure to RGB ndarray.
-def get_img(X,Y,P):
-    fig = plt.figure()
-    plt.plot(X,Y)
-    plt.scatter(P,obj_fn(P), color='red', marker='*')
-    fig.tight_layout(pad=0)
-    fig.canvas.draw()
-    data = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-    data = data.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-    plt.close()
-
-    return data
-
 
 def mutate(P, f=0.9):
+    # empty placeholder for mutated population, with same size to original(or previous) population.
     M = np.empty_like(P)
+
+    # iterate individual c in previous population, mutate by difference from  2 randomly individuals picked from the rest population.
     for i, c in enumerate(P):
+        
+        # randomly pick 2 individuals from the subset in which the current individual was excluded.
         a,b = np.random.choice(np.concatenate([P[:i],P[i+1:]]),2)
+
+        # mutation.
         M[i] = c + F*(a-b)
+
     return M
 
 
 def cross(P, M, cr=0.5):
+    # crossover for 1-dimensional individuals given that scenario.
     new_P = np.asarray([M[i] if np.random.rand()<cr else P[i] for i in range(len(P))])
+    
     return new_P
 
 
@@ -68,33 +70,40 @@ if __name__ == '__main__':
 
     # initial population randomly sampled from (-50,50).
     P = np.random.rand(N)*100-50
-
-    img_list = [] # only for image saving purpose.
+    
+    # for gif generating purpose.
+    P_seq = [[]] 
+    
     try:
         with tqdm(range(max_G)) as t:
 
             # iterate N generation
             for i in t:
-                # plot current location of individuals over ojective function figure.
-                img_list.append(get_img(X,Y,P))
+                # record current population state.
+                P_seq.append(P)
+                
                 M = mutate(P)
-                P = cross(P,M)           
-                P = select(P)
+                new_P = cross(P,M)  
+                P = select(np.concatenate([P,new_P], axis=0))
 
     except KeyboardInterrupt:
         t.close()
         raise
     finally:
         t.close
-
+        
+    # record the final population state.
+    P_seq.append(P)
+    
+    
     # generate animation gif.
-    duration = 1
-    fps = 20
-
-    # callback function required by generate animation.
-    def make_frame_mpl(t):
-        t=int(t*duration*fps)
-        return img_list[t] # RGB ndarray for image.
-
-    animation =mpy.VideoClip(make_frame_mpl, duration=duration)
-    animation.write_gif("de_iteration.gif", fps)
+    fig, ax = plt.subplots()
+    fig.set_tight_layout(True)
+    line = ax.plot(X,Y)
+    sc = ax.scatter(None,None,c='red')
+    def update(t):
+        ax.set_xlabel(f'iteration {t}')
+        sc.set_offsets(np.c_[P_seq[t],obj_fn(P_seq[t])])
+    
+    anim = FuncAnimation(fig, update, frames=np.arange(0, 21), interval=200)
+    anim.save('de_convergence.gif', dpi=80, writer='imagemagick')
