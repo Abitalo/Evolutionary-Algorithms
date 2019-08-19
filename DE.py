@@ -49,19 +49,8 @@ def mutate(P, f=0.9):
     return M
 
 
-# TODO : might be wrong but works now.
 def cross(P, M, cr=0.5):
-    new_P =np.empty(N+N**2)
-    new_P[:N] = P
-
-    # randomly sampled from [0,cr], controlling the impact of cross.
-    k = np.random.random()*cr
-
-    # cross between original population and mutated population. K*K scale.
-    P = (P*k).reshape((-1,1))
-    M = (M*(1-k)).reshape((1,-1))
-    new_P[N:] = (P@M).flatten()
-
+    new_P = np.asarray([M[i] if np.random.rand()<cr else P[i] for i in range(len(P))])
     return new_P
 
 
