@@ -31,21 +31,10 @@ def get_img(X,Y,P):
 
 
 def mutate(P, f=0.9):
-    # empty placeholder for mutated population, with same size to original(or previous) population.
     M = np.empty_like(P)
-
-    # iterate individual c in previous population, mutate by difference from  2 randomly individuals picked from the rest population.
     for i, c in enumerate(P):
-
-        # get the subset of population with current individuals removed.
-        indice = [x for x in range(N) if x is not i]
-
-        # randomly pick 2 individuals from the subset.
-        a,b = np.random.choice(P[indice],2)
-
-        # mutation.
+        a,b = np.random.choice(np.concatenate([P[:i],P[i+1:]]),2)
         M[i] = c + F*(a-b)
-
     return M
 
 
