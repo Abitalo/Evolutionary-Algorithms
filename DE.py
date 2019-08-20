@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 # from matplotlib.animation import FuncAnimation
 
-# Updated in 20 Oct. 2019, supports higher dimensions of feature space.
+# Updated in 20 Aug. 2019, supports higher dimensions of feature space.
 
 # This file implemented Differential Evolution Algorithm(DE) to search the global sub-optimal value for function obj_fn(x), 
 # which you can replace it with other function if you like.
